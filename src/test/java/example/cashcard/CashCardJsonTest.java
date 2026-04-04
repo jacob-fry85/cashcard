@@ -7,13 +7,22 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 @JsonTest
 public class CashCardJsonTest {
 
+    List<CashCard> cashCards = List.of(
+            new CashCard(99L, 123.45),
+     new CashCard(1L, 100.00),
+     new CashCard(101L, 150.00));
+
     @Autowired
     private JacksonTester<CashCard>  json;
+
+    @Autowired
+    private JacksonTester<List<CashCard>> jsonList;
 
     @Test
     void cashCardSerializationTest() throws IOException {
@@ -39,5 +48,22 @@ public class CashCardJsonTest {
     @Test
     void myFirstTest() {
         assertThat(5).isEqualTo(5);
+    }
+
+    @Test
+    void cashCardListSerializationTest() throws IOException {
+        assertThat(jsonList.write(cashCards)).isStrictlyEqualToJson("list.json");
+    }
+
+    @Test
+    void cashCardListDeserializationTest() throws IOException {
+        String expected="""
+         [
+            { "id": 99, "amount": 123.45 },
+            { "id": 100, "amount": 100.00 },
+            { "id": 101, "amount": 150.00 }
+         ]
+         """;
+        assertThat(jsonList.parse(expected)).isEqualTo(cashCards);
     }
 }
