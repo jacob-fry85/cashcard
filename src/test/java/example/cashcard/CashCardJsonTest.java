@@ -14,9 +14,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CashCardJsonTest {
 
     List<CashCard> cashCards = List.of(
-            new CashCard(99L, 123.45),
-     new CashCard(1L, 100.00),
-     new CashCard(101L, 150.00));
+            new CashCard(99L, 123.45, "sarah1"),
+            new CashCard(100L, 1.00, "sarah1"),
+            new CashCard(101L, 150.00, "sarah1")
+    );
 
     @Autowired
     private JacksonTester<CashCard>  json;
@@ -26,7 +27,7 @@ public class CashCardJsonTest {
 
     @Test
     void cashCardSerializationTest() throws IOException {
-        CashCard cashCard  = new CashCard(99L, 123.45);
+        CashCard cashCard  = new CashCard(99L, 123.45, "sarah1");
         assertThat(json.write(cashCard)).isStrictlyEqualToJson("expected.json");
         assertThat(json.write(cashCard)).hasJsonPathNumberValue("@.id");
         assertThat(json.write(cashCard)).extractingJsonPathNumberValue("@.id").isEqualTo(99);
@@ -57,13 +58,13 @@ public class CashCardJsonTest {
 
     @Test
     void cashCardListDeserializationTest() throws IOException {
-        String expected="""
-         [
-            { "id": 99, "amount": 123.45 },
-            { "id": 100, "amount": 100.00 },
-            { "id": 101, "amount": 150.00 }
-         ]
-         """;
+        String expected = """
+                [
+                   { "id": 99, "amount": 123.45 },
+                   { "id": 100, "amount": 1.00 },
+                   { "id": 101, "amount": 150.00 }
+                ]
+                """;
         assertThat(jsonList.parse(expected)).isEqualTo(cashCards);
     }
 }
