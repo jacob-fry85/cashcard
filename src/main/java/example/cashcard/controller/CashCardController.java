@@ -2,6 +2,11 @@ package example.cashcard.controller;
 
 import example.cashcard.model.CashCard;
 import example.cashcard.repository.CashCardRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -48,9 +54,20 @@ public class CashCardController {
         return ResponseEntity.created(location).body(saved);
     }
 
-    @GetMapping
-    private ResponseEntity<Iterable<CashCard>> findAll() {
-        return ResponseEntity.ok(cashCardRepository.findAll());
-    }
+//    @GetMapping
+//    private ResponseEntity<List<CashCard>> findAll(Pageable pageable) {
+//        Page<CashCard> page = cashCardRepository.findAll(pageable);
+//        return ResponseEntity.ok(page.getContent());
+//    }
 
+    @GetMapping
+    private ResponseEntity<List<CashCard>> findAll(
+            @PageableDefault(
+                    sort = "amount",
+                    direction = Sort.Direction.ASC
+            ) Pageable pageable) {
+
+        Page<CashCard> page = cashCardRepository.findAll(pageable);
+        return ResponseEntity.ok(page.getContent());
+    }
 }
