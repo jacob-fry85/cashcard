@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -27,9 +28,7 @@ public class CashCardController {
 
     @GetMapping("/{requestedId}")
     public ResponseEntity<CashCard> findById(@PathVariable Long requestedId, Principal principal) {
-        return Optional.ofNullable(
-                        cashCardRepository.findByIdAndOwner(requestedId, principal.getName())
-                )
+        return cashCardRepository.findByIdAndOwner(requestedId, principal.getName())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -69,5 +68,41 @@ public class CashCardController {
         );
 
         return ResponseEntity.ok(page.getContent());
+    }
+
+    @PutMapping("/{requestedId}")
+    public ResponseEntity<Void> updateCashCard(@PathVariable Long requestedId,
+                                            @RequestBody CashCard cashCard,
+                                            Principal principal) {
+        Optional<CashCard> optionalCashCard =
+                cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
+        if(optionalCashCard.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        CashCard existingCashCard = optionalCashCard.get();
+
+        CashCard updatedCashCard = new CashCard(
+                requestedId,
+                cashCard.amount(),
+                existingCashCard.owner()
+        );
+
+        cashCardRepository.save(updatedCashCard);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{requestedId}")
+    public ResponseEntity<Void> deleteCashCard(@PathVariable Long requestedId,
+                                               Principal principal) {
+        int deleted = cashCardRepository
+                .deleteByIdAndOwner(requestedId, principal.getName());
+
+        if (deleted == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.noContent().build();
     }
 }
